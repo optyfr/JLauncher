@@ -2,12 +2,11 @@ def os = System.getProperty("os.name").toLowerCase()
 if (os.contains("windows"))
 {
 	apply plugin: 'cpp'
-	apply plugin: "visual-studio"
 	apply plugin: "windows-resources"
-	
-	model {
+
+	model {		
 		components {
-			jlauncher(NativeExecutableSpec) {
+			JLauncher(NativeExecutableSpec) {
 				sources {
 					cpp {
 						source {
@@ -24,11 +23,7 @@ if (os.contains("windows"))
 				}
 			}
 		}
-		visualStudio {
-			projects.all {
-				projectFile.location = "JLauncher/${name}.vcxproj"
-				filtersFile.location = "JLauncher/${name}.vcxproj.filters"
-			}
-		}
 	}
 }
+else
+	logger.info("Not on Windows, skipping JLauncher build.")
