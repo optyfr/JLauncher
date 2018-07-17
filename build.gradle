@@ -1,0 +1,34 @@
+def os = System.getProperty("os.name").toLowerCase()
+if (os.contains("windows"))
+{
+	apply plugin: 'cpp'
+	apply plugin: "visual-studio"
+	apply plugin: "windows-resources"
+	
+	model {
+		components {
+			jlauncher(NativeExecutableSpec) {
+				sources {
+					cpp {
+						source {
+							srcDir "JLauncher"
+							include "**/*.cpp"
+						}
+					}
+					rc {
+						source {
+							srcDir "JLauncher"
+							include "**/*.rc"
+						}
+					}
+				}
+			}
+		}
+		visualStudio {
+			projects.all {
+				projectFile.location = "JLauncher/${name}.vcxproj"
+				filtersFile.location = "JLauncher/${name}.vcxproj.filters"
+			}
+		}
+	}
+}
