@@ -1,8 +1,9 @@
 //{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
+// fichier Include Microsoft Visual C++.
+// Utilisé par JLauncher.rc
 //
-#define IDS_APP_TITLE                   103
-#define IDI_JLAUNCHER                   104
+#define IDS_APP_TITLE                   101
+#define IDI_JLAUNCHER                   102
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

@@ -1,91 +1,85 @@
+/*
+	Part of this code was inspired from Negatron-Bootstrap
+*/
 #include "stdafx.h"
+
 #include "JLauncher.h"
 
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib ,"user32.lib")
 
-// Forward declarations of functions included in this code module:
-TCHAR * concat(TCHAR* format, ...);
-
-int APIENTRY _tWinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
+DWORD currentPath(TCHAR* workingPath, TCHAR* baseName)
 {
-	// Determine current working directory
-	TCHAR workingPath[MAX_PATH];
-    if(!GetModuleFileName(NULL, workingPath, MAX_PATH))
-        return GetLastError();
+	// get working path from current executable path
+	if (!GetModuleFileName(NULL, workingPath, MAX_PATH))
+		return GetLastError();
+
+	// search where workingpath should really end (ie: up to last backslash)
 	TCHAR * endPath = _tcsrchr(workingPath, TEXT('\\'));
 	*endPath = '\0';
-	TCHAR baseName[MAX_PATH];
+
+	// get basename past workingpath's nul string stopping to last dot char
 	endPath++;
 	TCHAR * endBaseName = _tcsrchr(endPath, TEXT('.'));
 	*endBaseName = '\0';
-	_tcscpy_s(baseName, endPath);
-
-	// Look for any portable versions of Java included in JLauncher's installation folder
-	WIN32_FIND_DATA fileData;
-	TCHAR jrePath[MAX_PATH] = TEXT("javaw.exe");
-	TCHAR jrePathMask[MAX_PATH];
-	_tcscpy_s(jrePathMask, workingPath);
-	_tcscat_s(jrePathMask, TEXT("\\jre*"));
-	HANDLE hFind = FindFirstFile(jrePathMask, &fileData);
-	if (hFind != INVALID_HANDLE_VALUE) do {
-		if (fileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
-			_tcscpy_s(jrePathMask, fileData.cFileName);
-			_tcscat_s(jrePathMask, TEXT("\\bin\\javaw.exe"));
-			if (PathFileExists(jrePathMask) == TRUE) {
-				_tcscpy_s(jrePath, jrePathMask);
-				break;
-			}
-		}
-	} while (FindNextFile(hFind, &fileData) != 0);
-	if (hFind != INVALID_HANDLE_VALUE)
-		FindClose(hFind);
-
-	TCHAR * arguments = concat(TEXT("%s -Xmx1g -jar \"%s\\%s.jar\" --multiuser --noupdate"), jrePath, workingPath, baseName);
-
-	STARTUPINFO si;
-    ZeroMemory( &si, sizeof(si) );
-    si.cb = sizeof(si);
-	PROCESS_INFORMATION pi;
-	ZeroMemory( &pi, sizeof(pi) );
-
-	if (!CreateProcess(NULL,   // No module name (use command line)
-		arguments,      // Command line
-		NULL,           // Process handle not inheritable
-		NULL,           // Thread handle not inheritable
-		FALSE,          // Set handle inheritance to FALSE
-		0,              // No creation flags
-		NULL,           // Use parent's environment block
-		workingPath,    // Use parent's starting directory 
-		&si,            // Pointer to STARTUPINFO structure
-		&pi             // Pointer to PROCESS_INFORMATION structure
-	)) {
-		printf("CreateProcess failed (%d).\n", GetLastError());
-		free(arguments);
-		return 0;
-	}
-	else
-		printf("launched '%s'", arguments);
-
-    // Wait until child process exits.
-    WaitForSingleObject(pi.hProcess, INFINITE);
-
-    // Close process and thread handles. 
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-	free(arguments);
+	_tcscpy_s(baseName, MAX_PATH, endPath);
 
 	return 0;
 }
 
-TCHAR * concat(TCHAR* format, ...) {
-   va_list args;
-   int len;
-   TCHAR * buffer;
+TCHAR * format(TCHAR* format, ...) {
+	va_list args;
+	va_start(args, format);
+	int len = _vsctprintf(format, args) + 1;
+	TCHAR* buffer = new TCHAR[len];
+	_vstprintf_s(buffer, len, format, args);
+	return buffer;
+}
 
-   va_start(args, format);
-   len = _vsctprintf(format, args) + 1; // _vscprintf doesn't count terminating '\0'
-   buffer = (TCHAR *) malloc(len * sizeof(TCHAR));
-   _vstprintf_s(buffer, len, format, args);
+int APIENTRY _tWinMain(	HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
+{
+	TCHAR workingPath[MAX_PATH]{}, jrePath[MAX_PATH], baseName[MAX_PATH];
+	TCHAR jre[] = TEXT("javaw.exe");
+	DWORD error = currentPath(workingPath, baseName);
+	if (error != 0)
+		return error;
 
-   return buffer;
+	if(SearchPath(NULL, jre, NULL, MAX_PATH, jrePath, NULL))
+	{
+		DWORD binaryType = 0;
+		TCHAR* mem = TEXT("1g");
+		if (!GetBinaryType(jrePath, &binaryType))
+		{
+			MessageBox(0, format(TEXT("Failed to get type of %s"), jre), TEXT("Error"), MB_OK);
+			return -2;
+		}
+		if (binaryType == SCS_64BIT_BINARY)
+			mem = TEXT("2g");
+		if (PathFileExists(format(TEXT("%s\\%s.jar"), workingPath, baseName)))
+		{
+			TCHAR * args = format(TEXT("-Xms512k -Xmx%s -jar \"%s.jar\" --multiuser --noupdate"), mem, baseName);
+			PROCESS_INFORMATION pnfo{};
+			STARTUPINFO snfo{};
+			snfo.cb = sizeof(STARTUPINFO);
+			if (!CreateProcess(jrePath /* application */, args /* cmdline */, NULL /* processAttributes */, NULL /* ThreadAttributes*/, FALSE /* InheritHandles */, 0 /* creation flags */, NULL /* env */, workingPath /* current process path */, &snfo, &pnfo))
+			{
+				MessageBox(0, format(TEXT("CreateProcess failed (%d)."), GetLastError()), TEXT("Error"), MB_OK);
+				return 0;
+			}
+			WaitForSingleObject(pnfo.hProcess, INFINITE);
+			CloseHandle(pnfo.hProcess);
+			CloseHandle(pnfo.hThread);
+		}
+		else
+		{
+			MessageBox(0, format(TEXT("%s.jar is missing, it should be located at :\n\"%s\"\nwhere %s.exe (this executable) currently reside..."), baseName, workingPath, baseName), TEXT("Error"), MB_OK);
+			return -3;
+		}
+	}
+	else
+	{
+		MessageBox(0, TEXT("javaw.exe was not found in your PATH environment variable.\nYou must install Java (1.8.0 or later)!"), TEXT("Error"), MB_OK);
+		return -1;
+	}
+	return 0;
 }

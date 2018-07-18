@@ -23,6 +23,22 @@ if (os.contains("windows"))
 				}
 			}
 		}
+		binaries {
+			all {
+				// Define a preprocessor macro for every binary
+				cppCompiler.define "NDEBUG"
+				cppCompiler.define "WIN32"
+				cppCompiler.define "_WINDOWS"
+				cppCompiler.define "UNICODE"
+				cppCompiler.define "_UNICODE"
+
+				// Define toolchain-specific compiler and linker options
+				if (toolChain in VisualCpp) {
+					cppCompiler.args '/GS /GL /analyze- /W3 /Gy- /Zc:wchar_t /Gm- /O1 /Ob0 /Zc:inline /fp:precise /WX- /Zc:forScope /Gd /Oy- /MT /std:c++17 /FC /EHsc /nologo /Os'
+					linker.args '/NXCOMPAT /OPT:REF /SAFESEH /SUBSYSTEM:WINDOWS /OPT:ICF /NOLOGO /TLBID:1 '
+				}
+			}
+		}
 	}
 }
 else

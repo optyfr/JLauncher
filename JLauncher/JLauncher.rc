@@ -18,10 +18,11 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United States) resources
+// Anglais (États-Unis) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -53,15 +54,16 @@ END
 
 #endif    // APSTUDIO_INVOKED
 
-#endif    // English (United States) resources
+#endif    // Anglais (États-Unis) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
 /////////////////////////////////////////////////////////////////////////////
-// English (United Kingdom) resources
+// Anglais (Royaume-Uni) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -70,7 +72,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
 
 // Icon with lowest ID value placed first to ensure application icon
 // remains consistent on all systems.
-IDI_JLAUNCHER            ICON                    "JLauncher.ico"
+IDI_JLAUNCHER           ICON                    "JLauncher.ico"
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -78,8 +81,8 @@ IDI_JLAUNCHER            ICON                    "JLauncher.ico"
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,3
- PRODUCTVERSION 1,0,0,3
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -94,11 +97,9 @@ BEGIN
     BEGIN
         BLOCK "080904b0"
         BEGIN
-            VALUE "CompanyName", ""
             VALUE "FileDescription", "JLauncher"
             VALUE "FileVersion", "1.0.0.0"
             VALUE "InternalName", "JLauncher.exe"
-            VALUE "LegalCopyright", ""
             VALUE "OriginalFilename", "JLauncher.exe"
             VALUE "ProductName", "JLauncher"
             VALUE "ProductVersion", "1.0.0.0"
@@ -121,7 +122,7 @@ BEGIN
     IDS_APP_TITLE           "JLauncher"
 END
 
-#endif    // English (United Kingdom) resources
+#endif    // Anglais (Royaume-Uni) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
@@ -135,3 +136,4 @@ END
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED
+
