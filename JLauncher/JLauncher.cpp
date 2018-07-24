@@ -1,6 +1,7 @@
 /*
 	Some parts of this code was inspired from Negatron-Bootstrap
 */
+
 #include "stdafx.h"
 
 #include "JLauncher.h"
